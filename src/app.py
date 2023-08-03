@@ -17,7 +17,7 @@ def lambda_handler(event, context):
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = event['Records'][0]['s3']['object']['key']
 
-    # Set up the target bucket where the generated thumbnails will be stored
+    # Set up the target bucket where the generated thumbnails will be stored (NB:Replace name with your own as S3 bucket name should be globally unique)
     thumbnail_bucket = 'leslie-thumbnail-image-bucket'
     
     # Extract the name and extension of the original image file
