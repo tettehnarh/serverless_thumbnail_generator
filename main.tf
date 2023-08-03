@@ -54,3 +54,18 @@ resource "aws_iam_role" "thumbnail_lambda_role" {
   })
 }
 
+# Attach the S3 policy to the Lambda role
+resource "aws_iam_policy_attachment" "thumbnail_role_s3_policy_attachment" {
+  name       = "thumbnail_role_s3_policy_attachment"
+  roles      = [aws_iam_role.thumbnail_lambda_role.name]
+  policy_arn = aws_iam_policy.thumbnail_s3_policy.arn
+}
+
+# Attach the AWSLambdaBasicExecutionRole policy to the Lambda role
+resource "aws_iam_policy_attachment" "thumbnail_role_lambda_policy_attachment" {
+  name       = "thumbnail_role_lambda_policy_attachment"
+  roles      = [aws_iam_role.thumbnail_lambda_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+
