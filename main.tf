@@ -87,3 +87,33 @@ resource "aws_lambda_function" "thumbnail_lambda" {
   layers           = ["arn:aws:lambda:${var.aws_region}:770693421928:layer:Klayers-p39-pillow:1"]
 }
 
+# Create S3 buckets for the original images and thumbnails
+resource "aws_s3_bucket" "thumbnail_original_image_bucket" {
+  bucket = var.original_image_bucket_name
+}
+
+resource "aws_s3_bucket" "thumbnail_image_bucket" {
+  bucket = var.thumbnail_image_bucket_name
+}
+
+# Allow S3 to invoke the Lambda function when new objects are created
+resource "aws_lambda_permission" "thumbnail_allow_bucket" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.thumbnail_lambda.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.thumbnail_original_image_bucket.arn
+}
+
+# Configure S3 bucket notification to trigger the Lambda function when new objects are created
+resource "aws_s3_bucket_notification" "thumbnail_notification" {
+  bucket = aws_s3_bucket.thumbnail_original_image_bucket.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.thumbnail_lambda.arn
+    events              = ["s3:ObjectCreated:*"]
+  }
+
+  depends_on = [aws_lambda_permission.thumbnail_allow_bucket]
+}
+
