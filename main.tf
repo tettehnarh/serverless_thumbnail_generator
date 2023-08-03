@@ -68,4 +68,22 @@ resource "aws_iam_policy_attachment" "thumbnail_role_lambda_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+# Create a ZIP archive containing the Lambda function code
+data "archive_file" "thumbnail_lambda_source_archive" {
+  type        = "zip"
+  source_dir  = "${path.module}/${var.lambda_source_dir}"
+  output_path = "${path.module}/my-deployment.zip"
+}
+
+# Define the Lambda function
+resource "aws_lambda_function" "thumbnail_lambda" {
+  function_name    = var.lambda_function_name
+  filename         = "${path.module}/my-deployment.zip"
+  runtime          = "python3.9"
+  handler          = "app.lambda_handler"
+  memory_size      = var.lambda_memory_size
+  source_code_hash = data.archive_file.thumbnail_lambda_source_archive.output_base64sha256
+  role             = aws_iam_role.thumbnail_lambda_role.arn
+  layers           = ["arn:aws:lambda:${var.aws_region}:770693421928:layer:Klayers-p39-pillow:1"]
+}
 
