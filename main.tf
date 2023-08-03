@@ -37,3 +37,20 @@ resource "aws_iam_policy" "thumbnail_s3_policy" {
   })
 }
 
+# Define IAM role for the Lambda function to assume
+resource "aws_iam_role" "thumbnail_lambda_role" {
+  name               = "thumbnail_lambda_role"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "lambda.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
